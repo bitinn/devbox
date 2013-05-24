@@ -1,34 +1,28 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
 
- config.vm.customize [
-    "modifyvm", :id,
-    "--memory", "1536",
-    "--cpus", "2",
-    "--ioapic", "on"
-  ]
+  # Use Ubuntu 12.04 LTS x64, for larger MongoDB database support
+  config.vm.box = "precise64"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
-  config.vm.box = "precise32"
-  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
-  config.vm.host_name = "devbox"
-  config.vm.share_folder("www", "/var/www", "./www", :extra => 'dmode=777,fmode=777', :nfs => true)
+  # Hostname and Synced Folder for Vagrant 1.2
+  config.vm.hostname = "devbox"
+  config.vm.synced_folder "www", "/var/www", :extra => "dmode=755,fmode=644"
 
-  # Set the Timezone to something useful
-  config.vm.provision :shell, :inline => "echo \"Europe/Berlin\" | sudo tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata"
+  # Basic private network for Vagrant 1.2
+  config.vm.network :private_network, ip: "192.168.10.10"
 
-  # Assign this VM to a host-only network IP, allowing you to access it
-  # via the IP. Host-only networks can talk to the host machine as well as
-  # any other machines on the same network, but cannot be accessed (through this
-  # network interface) by any external networks.
+  # Set a local time
+  config.vm.provision :shell, :inline => "echo \"Asia/Hong_Kong\" | sudo tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata"
 
-  config.vm.network :hostonly, "192.168.3.3"
-
+  # Puppet will handle the rest of install
   config.vm.provision :puppet do |puppet|
      puppet.facter = { "fqdn" => "local.devbox", "hostname" => "devbox" }
      puppet.manifests_path = "manifests"
      puppet.manifest_file  = "base.pp"
      puppet.module_path = "modules"
   end
+
 end
