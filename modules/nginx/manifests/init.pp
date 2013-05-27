@@ -24,8 +24,7 @@ class nginx::conf {
     source => 'puppet:///modules/nginx/nginx.conf'
   }
 
-
- file { '/usr/share/nginx/certs':
+  file { '/usr/share/nginx/certs':
     path => '/usr/share/nginx/certs',
     ensure => directory,
     owner => root,
@@ -34,7 +33,6 @@ class nginx::conf {
     recurse => true,
     source => "puppet:///modules/nginx/certs",
   }
-
 
   file { 'nginx/sites-available':
     path => '/etc/nginx/sites-available',
@@ -46,6 +44,25 @@ class nginx::conf {
     source => "puppet:///modules/nginx/sites-available",
   }
 
+  # new symblink option
+
+  file { '/etc/nginx/sites-enabled/laravel.dev':
+    ensure => link,
+    owner => root,
+    group => root,
+    target => "/etc/nginx/sites-available/laravel.dev",
+  }
+
+  file { '/etc/nginx/sites-enabled/laravel.dev.ssl':
+    ensure => link,
+    owner => root,
+    group => root,
+    target => "/etc/nginx/sites-available/laravel.dev.ssl",
+  }
+
+  /*
+  # disabled to use symlink instead
+
   file { 'nginx/sites-enabled':
     path => '/etc/nginx/sites-enabled',
     ensure => directory,
@@ -55,6 +72,7 @@ class nginx::conf {
     recurse => true,
     source => "puppet:///modules/nginx/sites-enabled",
   }
+  */
 
   file { 'var/www':
     path => '/var/www',
@@ -62,7 +80,6 @@ class nginx::conf {
     owner => root,
     group => root,
   }
-
 
 }
 
