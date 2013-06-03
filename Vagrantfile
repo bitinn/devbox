@@ -9,7 +9,8 @@ Vagrant.configure("2") do |config|
 
   # Hostname and Synced Folder for Vagrant 1.2
   config.vm.hostname = "devbox"
-  config.vm.synced_folder "www", "/var/www", :extra => "dmode=755,fmode=644"
+  # Neither 777 nor setting web root owner to www-data are safe in production environment, this is only to workaround virtualbox limits
+  config.vm.synced_folder "www", "/var/www", :extra => "dmode=777,fmode=777", :owner => "vagrant", :group => "vagrant"
 
   # Basic private network for Vagrant 1.2
   config.vm.network :private_network, ip: "192.168.10.10"
@@ -24,5 +25,8 @@ Vagrant.configure("2") do |config|
      puppet.manifest_file  = "base.pp"
      puppet.module_path = "modules"
   end
+
+  # Skip guest addition check, this base already has guest addition installed
+  config.vbguest.auto_update = false
 
 end
